@@ -61,11 +61,9 @@ namespace Yrki.IoT.WMBus.Parser
             var mfield = BitConverter.ToUInt16(bytes);
             var characters = new char[3];
 
-            for (int i = characters.Length - 1; i >= 0; i--)
-            {
-                characters[i] = Convert.ToChar((mfield % 32) + 64);
-                mfield = (ushort)((mfield - (mfield % 32)) / 32);
-            }
+            characters[0] = (char)((mfield / 1024) + 64);
+            characters[1] = (char)(((mfield % 1024) / 32) + 64);
+            characters[2] = (char)((mfield % 32) + 64);
 
             return new string(characters);
         }
