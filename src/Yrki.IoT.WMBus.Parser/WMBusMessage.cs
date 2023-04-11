@@ -12,5 +12,6 @@ namespace Yrki.IoT.WMBus.Parser
         public byte Sequence { get; set; }
         public byte Status { get; set; }
         public EncryptionMethod EncryptionMethod { get; set; }
+        public IParsedMessage ParsedPayload { get; internal set; }
     }    
 }

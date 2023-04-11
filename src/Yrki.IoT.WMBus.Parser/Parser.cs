@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Yrki.IoT.WMBus.Parser
 {
@@ -27,9 +28,38 @@ namespace Yrki.IoT.WMBus.Parser
             wmBusMessage.Sequence = message[11];
             wmBusMessage.Status = message[12];
             wmBusMessage.EncryptionMethod = GetEncryptionMethod(message.AsSpan(13, 2).ToArray());
-            
-            return wmBusMessage;
 
+            var parser = ParserFactory.GetParser(wmBusMessage.MField);
+            var payload = message.AsSpan(15, message.Length - 15).ToArray();
+
+            var decryptedPayload = DecryptedPayload(wmBusMessage, payload);
+
+            wmBusMessage.ParsedPayload = parser.Parse(message[9], message[8], decryptedPayload);
+
+            return wmBusMessage;
+        }
+
+        private byte[] DecryptedPayload(WMBusMessage wmBusMessage, byte[] payload)
+        {
+            if (wmBusMessage.EncryptionMethod != EncryptionMethod.None)
+            {
+                throw new NotImplementedException();
+            }
+
+            if (!IsSuccessfullyDecrypted(payload)) throw new ApplicationException("Could not decrypt message with current key");
+
+            return TrimEncryptionVerificationBytes(payload);
+        }
+
+        private static byte[] TrimEncryptionVerificationBytes(byte[] payload)
+        {
+            return payload.AsSpan(2, payload.Length - 2).ToArray();
+        }
+
+        private bool IsSuccessfullyDecrypted(byte[] payload)
+        {
+            if (payload[0] == 0x2F && payload[1] == 0x2F) return true;
+            return false;
         }
 
         private EncryptionMethod GetEncryptionMethod(byte[] bytes)

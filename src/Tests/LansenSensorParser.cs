@@ -1,4 +1,6 @@
 ﻿using Yrki.IoT.WMBus.Parser;
+using Yrki.IoT.WMBus.Parser.Lansen.Messages;
+using FluentAssertions;
 
 namespace Tests
 {
@@ -39,7 +41,7 @@ namespace Tests
 
 
         [TestMethod]
-        public async Task SomeTest()
+        public void Lansen_LAN_WMBUS_E2_CO2_S()
         {
             // Arrange  
             var message = """"
@@ -66,7 +68,7 @@ namespace Tests
                 C2 01 FD 3A 24 23
                 82 40 FD 3A 02 00
                 82 80 40 FD 3A 28 00
-                C2 80 40 DF 3A 2B 00
+                C2 80 40 FD 3A 2B 00
                 82 02 23 00 00
                 02 27 00 00
                 02 FD 0F 04 00
@@ -83,10 +85,30 @@ namespace Tests
             var result = parser.Parse(message);
 
             // Assert
-            Assert.AreEqual("LAS", result.MField);
-            Assert.AreEqual("00010067", result.AField);
-            Assert.AreEqual(DeviceType.CarbonDioxide, result.DeviceType);
-            Assert.AreEqual(EncryptionMethod.None, result.EncryptionMethod);
+            result.MField.Should().Be("LAS");
+            result.AField.Should().Be("00010067");
+            result.DeviceType.Should().Be(DeviceType.CarbonDioxide);
+            result.EncryptionMethod.Should().Be(EncryptionMethod.None);
+            result.ParsedPayload.Should().BeOfType<LansenE2_CO2_S>();
+            
+            var payload = (LansenE2_CO2_S)result.ParsedPayload;
+            payload.TemperatureLastMeasuredValue.Should().Be(43.86);
+            payload.TemperatureAverageLastHour.Should().Be(172.53);
+            payload.TemperatureAverageLast24Hours.Should().Be(43.86);
+            payload.HumidityLastMeasuredValue.Should().Be(438.6);
+            payload.HumidityAverageLastHour.Should().Be(438.6);
+            payload.HumidityAverageLast24Hours.Should().Be(438.6);
+            payload.CO2LastMeasuredValue.Should().Be(4386);
+            payload.CO2AverageLastHour.Should().Be(8755);
+            payload.CO2AverageLast24Hours.Should().Be(258);
+            payload.CO2LastUsedCalibrationValue.Should().Be(8996);
+            payload.CO2MinutesToNextCalibration.Should().Be(2);
+            payload.SoundLevelLastMeasuredValue.Should().Be(40);
+            payload.SoundLevelAverageLastHour.Should().Be(43);
+            payload.OnTimeInDays.Should().Be(0);
+            payload.OperatingTimeInDays.Should().Be(0);
+            payload.ProductVersion.Should().Be(4);
+            payload.StatusAndIndications.Should().HaveCount(0);
         }
 
     }
