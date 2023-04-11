@@ -1,6 +1,6 @@
 ﻿using Yrki.IoT.WMBus.Parser;
-using Yrki.IoT.WMBus.Parser.Lansen.Messages;
 using FluentAssertions;
+using Yrki.IoT.WMBus.Parser.Manufacturers.Lansen.Payloads;
 
 namespace Tests
 {
@@ -82,16 +82,15 @@ namespace Tests
 
 
             // Act
-            var result = parser.Parse(message);
+            var header = parser.ParseHeader(message);
+            var payload = (LansenE2_CO2_S)parser.ParsePayload(message, string.Empty);
 
             // Assert
-            result.MField.Should().Be("LAS");
-            result.AField.Should().Be("00010067");
-            result.DeviceType.Should().Be(DeviceType.CarbonDioxide);
-            result.EncryptionMethod.Should().Be(EncryptionMethod.None);
-            result.ParsedPayload.Should().BeOfType<LansenE2_CO2_S>();
+            header.MField.Should().Be("LAS");
+            header.AField.Should().Be("00010067");
+            header.DeviceType.Should().Be(DeviceType.CarbonDioxide);
+            header.EncryptionMethod.Should().Be(EncryptionMethod.None);
             
-            var payload = (LansenE2_CO2_S)result.ParsedPayload;
             payload.TemperatureLastMeasuredValue.Should().Be(43.86);
             payload.TemperatureAverageLastHour.Should().Be(172.53);
             payload.TemperatureAverageLast24Hours.Should().Be(43.86);
@@ -108,7 +107,7 @@ namespace Tests
             payload.OnTimeInDays.Should().Be(0);
             payload.OperatingTimeInDays.Should().Be(0);
             payload.ProductVersion.Should().Be(4);
-            payload.StatusAndIndications.Should().HaveCount(0);
+            payload.StatusAndIndications.Should().HaveCount(1);
         }
 
     }

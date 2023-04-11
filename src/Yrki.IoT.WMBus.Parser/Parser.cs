@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using Yrki.IoT.WMBus.Parser.Extensions;
 
 namespace Yrki.IoT.WMBus.Parser
 {
     public class Parser
     {
-
-        public WMBusMessage Parse(string message)
+        public WMBusMessage ParseHeader(string hexMessage)
         {
-            byte[] bytes = ConvertHexStringToByteArray(message);
-
-            return Parse(bytes);
+            return ParseHeader(hexMessage.ToByteArray());
         }
 
-        public WMBusMessage Parse(byte[] message)
+        public WMBusMessage ParseHeader(byte[] message)
         {
             var wmBusMessage = new WMBusMessage();
 
@@ -29,20 +27,34 @@ namespace Yrki.IoT.WMBus.Parser
             wmBusMessage.Status = message[12];
             wmBusMessage.EncryptionMethod = GetEncryptionMethod(message.AsSpan(13, 2).ToArray());
 
-            var parser = ParserFactory.GetParser(wmBusMessage.MField);
-            var payload = message.AsSpan(15, message.Length - 15).ToArray();
-
-            var decryptedPayload = DecryptedPayload(wmBusMessage, payload);
-
-            wmBusMessage.ParsedPayload = parser.Parse(message[9], message[8], decryptedPayload);
-
             return wmBusMessage;
         }
 
-        private byte[] DecryptedPayload(WMBusMessage wmBusMessage, byte[] payload)
+
+        public IParsedPayload ParsePayload(string hexMessage, string encryptionKey)
         {
-            if (wmBusMessage.EncryptionMethod != EncryptionMethod.None)
+            return ParsePayload(hexMessage.ToByteArray(), encryptionKey);
+        }
+
+        public IParsedPayload ParsePayload(byte[] message, string encryptionKey)
+        {
+            var header = ParseHeader(message);
+            var parser = ParserFactory.GetParser(header.MField);
+
+            var payload = message.AsSpan(15, message.Length - 15).ToArray();
+
+            var decryptedPayload = DecryptPayload(header, payload, encryptionKey);
+
+            return parser.ParsePayload(message[9], message[8], decryptedPayload);
+        }
+
+
+        private byte[] DecryptPayload(WMBusMessage header, byte[] payload, string encryptionKey)
+        {
+            if (header.EncryptionMethod != EncryptionMethod.None)
             {
+                // TODO: Get the Init Vector from the message
+                // Decrypt the payload
                 throw new NotImplementedException();
             }
 
@@ -98,17 +110,6 @@ namespace Yrki.IoT.WMBus.Parser
             return new string(characters);
         }
 
-        private byte[] ConvertHexStringToByteArray(string message)
-        {
-            var bytes = new byte[message.Length / 2];
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                var index = i * 2;
-                bytes[i] = Convert.ToByte(message.Substring(index, 2), 16);
-            }
-
-            return bytes;
-        }
     }
 
 

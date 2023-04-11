@@ -1,22 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Yrki.IoT.WMBus.Parser.Lansen;
-using Yrki.IoT.WMBus.Parser.Lansen.Messages;
+using Yrki.IoT.WMBus.Parser.Manufacturers.Axioma;
+using Yrki.IoT.WMBus.Parser.Manufacturers.Lansen;
 
-namespace Yrki.IoT.WMBus.Parser
+namespace Yrki.IoT.WMBus.Parser;
+
+internal static class ParserFactory
 {
-    internal static class ParserFactory
+    internal static IPayloadParser GetParser(string manufacturerId)
     {
-        internal static IInternalParser GetParser(string manufacturerId)
+        switch (manufacturerId)
         {
-            switch (manufacturerId)
-            {
-                case "LAS":
-                    return new LansenParser();
-                default:
-                    throw new Exception("Could not find parser for this manufacturer");
-            }
+            case "AXI": 
+                return new AxiomaParser();
+            case "LAS":
+                return new LansenParser();
+            default:
+                throw new Exception("Could not find parser for this manufacturer");
         }
     }
 }

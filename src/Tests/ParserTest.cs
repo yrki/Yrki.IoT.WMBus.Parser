@@ -13,7 +13,7 @@ public class ParserTest
         var parser = new Parser();
 
         // Act
-        var result = parser.Parse(wmBusMessage);
+        var result = parser.ParseHeader(wmBusMessage);
 
         // Assert
         Assert.AreEqual(63, result.LField);
