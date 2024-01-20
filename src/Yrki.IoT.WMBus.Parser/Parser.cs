@@ -45,13 +45,14 @@ namespace Yrki.IoT.WMBus.Parser
             var parser = ParserFactory.GetParser(header.MField);
             var initializationVector = GetInitVector(message);
             var payload = message.AsSpan(15, message.Length - 15).ToArray();
-
-            //System.Diagnostics.Debug.WriteLine(encryptionKey);
-            //System.Diagnostics.Debug.WriteLine(initializationVector.ToHexString());
-            //System.Diagnostics.Debug.WriteLine(payload.ToHexString());
-
             var decryptedPayload = DecryptPayload(header, initializationVector, payload, encryptionKey);
+
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine(encryptionKey);
+            System.Diagnostics.Debug.WriteLine(initializationVector.ToHexString());
             System.Diagnostics.Debug.WriteLine(payload.ToHexString());
+            System.Diagnostics.Debug.WriteLine(decryptedPayload.ToHexString());
+#endif
 
             return parser.ParsePayload(message[9], message[8], decryptedPayload);
         }
@@ -69,10 +70,10 @@ namespace Yrki.IoT.WMBus.Parser
             iv[5] = message[7]; // Address byte 4
             iv[6] = message[8]; // Version byte 1
             iv[7] = message[9]; // Device type byte 1
-            
+
             // Use the AccessNumber as padding
             // Note: This can be differnet index on T1 and C1 messages, so must be handled differently
-            for (int i = 8; i < 15; i++)
+            for (int i = 9; i < 15; i++)
             {
                 iv[i] = message[11];
             }
@@ -148,9 +149,13 @@ namespace Yrki.IoT.WMBus.Parser
             {
                 return EncryptionMethod.None;
             }
-            else
+            else if (bytes[1] == 0x05)
             {
                 return EncryptionMethod.Aes128;
+            }
+            else
+            {
+                throw new NotImplementedException("Encryption method is not implemented");
             }
         }
 
