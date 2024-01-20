@@ -6,6 +6,8 @@ namespace Yrki.IoT.WMBus.Parser.Extensions
     {
         public static byte[] ToByteArray(this string message)
         {
+            message = message.Replace(" ", string.Empty);
+
             var bytes = new byte[message.Length / 2];
             for (int i = 0; i < bytes.Length; i++)
             {
