@@ -48,6 +48,7 @@ namespace Yrki.IoT.WMBus.Parser
             var decryptedPayload = DecryptPayload(header, initializationVector, payload, encryptionKey);
 
 #if DEBUG
+            System.Diagnostics.Debug.WriteLine(message.ToHexString());
             System.Diagnostics.Debug.WriteLine(encryptionKey);
             System.Diagnostics.Debug.WriteLine(initializationVector.ToHexString());
             System.Diagnostics.Debug.WriteLine(payload.ToHexString());
@@ -73,7 +74,7 @@ namespace Yrki.IoT.WMBus.Parser
 
             // Use the AccessNumber as padding
             // Note: This can be differnet index on T1 and C1 messages, so must be handled differently
-            for (int i = 9; i < 15; i++)
+            for (int i = 8; i < 16; i++)
             {
                 iv[i] = message[11];
             }
