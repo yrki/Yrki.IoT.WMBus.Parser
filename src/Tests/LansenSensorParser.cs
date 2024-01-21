@@ -1,12 +1,23 @@
 ﻿using Yrki.IoT.WMBus.Parser;
 using FluentAssertions;
 using Yrki.IoT.WMBus.Parser.Manufacturers.Lansen.Payloads;
+using Microsoft.Extensions.Configuration;
 
 namespace Tests
 {
     [TestClass]
     public class LansenSensorParserTest
     {
+        private readonly IConfigurationRoot _configuration;
+
+        public LansenSensorParserTest()
+        {
+            var builder = new ConfigurationBuilder()
+                        .AddUserSecrets<ParserTest>()
+                        .AddUserSecrets<ParserTest>();
+
+            _configuration = builder.Build();
+        }
         //HEADER: 
         //XX                   // L-Field 
         //44                   // C-Field 
@@ -110,8 +121,24 @@ namespace Tests
             payload.StatusAndIndications.Should().HaveCount(1);
         }
 
-    }
+        [TestMethod]
+        [Ignore("Needs to have a user-secret with the correct key")]
+        public async Task Parse_encrypted_message()
+        {
+            // Arrange
+            var parser = new Parser();
+            var message = "TODO:GetMessage";
+            var encryptionKey = _configuration.GetSection("LANSEN_ENCRYPTIONKEY").Value;
 
+            // Act
+            var parsed = parser.ParsePayload(message, encryptionKey);
+
+            // Assert
+            // TODO: Assert
+        }
+
+
+    }
 
     public enum DeviceStatus
     {
