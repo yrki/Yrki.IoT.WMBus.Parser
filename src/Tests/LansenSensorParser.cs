@@ -1,11 +1,9 @@
 ﻿using Yrki.IoT.WMBus.Parser;
-using FluentAssertions;
 using Yrki.IoT.WMBus.Parser.Manufacturers.Lansen.Payloads;
 using Microsoft.Extensions.Configuration;
 
 namespace Tests
 {
-    [TestClass]
     public class LansenSensorParserTest
     {
         private readonly IConfigurationRoot _configuration;
@@ -51,8 +49,8 @@ namespace Tests
         //01 FD 1B 00          // DR17: Table 2 : Status and indications
 
 
-        [TestMethod]
-        public void Lansen_LAN_WMBUS_E2_CO2_S()
+        [Fact]
+        public void Shall_parse_a_lansen_e2_co2_s_payload()
         {
             // Arrange  
             var message = """"
@@ -97,33 +95,32 @@ namespace Tests
             var payload = (LansenE2_CO2_S)parser.ParsePayload(message, string.Empty);
 
             // Assert
-            header.MField.Should().Be("LAS");
-            header.AField.Should().Be("00010067");
-            header.DeviceType.Should().Be(DeviceType.CarbonDioxide);
-            header.EncryptionMethod.Should().Be(EncryptionMethod.None);
+            Assert.Equal("LAS", header.MField);
+            Assert.Equal("00010067", header.AField);
+            Assert.Equal(DeviceType.CarbonDioxide, header.DeviceType);
+            Assert.Equal(EncryptionMethod.None, header.EncryptionMethod);
             
-            payload.TemperatureLastMeasuredValue.Should().Be(43.86);
-            payload.TemperatureAverageLastHour.Should().Be(172.53);
-            payload.TemperatureAverageLast24Hours.Should().Be(43.86);
-            payload.HumidityLastMeasuredValue.Should().Be(438.6);
-            payload.HumidityAverageLastHour.Should().Be(438.6);
-            payload.HumidityAverageLast24Hours.Should().Be(438.6);
-            payload.CO2LastMeasuredValue.Should().Be(4386);
-            payload.CO2AverageLastHour.Should().Be(8755);
-            payload.CO2AverageLast24Hours.Should().Be(258);
-            payload.CO2LastUsedCalibrationValue.Should().Be(8996);
-            payload.CO2MinutesToNextCalibration.Should().Be(2);
-            payload.SoundLevelLastMeasuredValue.Should().Be(40);
-            payload.SoundLevelAverageLastHour.Should().Be(43);
-            payload.OnTimeInDays.Should().Be(0);
-            payload.OperatingTimeInDays.Should().Be(0);
-            payload.ProductVersion.Should().Be(4);
-            payload.StatusAndIndications.Should().HaveCount(1);
+            Assert.Equal(43.86, payload.TemperatureLastMeasuredValue);
+            Assert.Equal(172.53, payload.TemperatureAverageLastHour);
+            Assert.Equal(43.86, payload.TemperatureAverageLast24Hours);
+            Assert.Equal(438.6, payload.HumidityLastMeasuredValue);
+            Assert.Equal(438.6, payload.HumidityAverageLastHour);
+            Assert.Equal(438.6, payload.HumidityAverageLast24Hours);
+            Assert.Equal(4386, payload.CO2LastMeasuredValue);
+            Assert.Equal(8755, payload.CO2AverageLastHour);
+            Assert.Equal(258, payload.CO2AverageLast24Hours);
+            Assert.Equal(8996, payload.CO2LastUsedCalibrationValue);
+            Assert.Equal(2, payload.CO2MinutesToNextCalibration);
+            Assert.Equal(40, payload.SoundLevelLastMeasuredValue);
+            Assert.Equal(43, payload.SoundLevelAverageLastHour);
+            Assert.Equal(0, payload.OnTimeInDays);
+            Assert.Equal(0, payload.OperatingTimeInDays);
+            Assert.Equal(4, payload.ProductVersion);
+            Assert.Single(payload.StatusAndIndications);
         }
 
-        [TestMethod]
-        [Ignore("Needs to have a user-secret with the correct key")]
-        public async Task Parse_encrypted_message()
+        [Fact(Skip = "Needs to have a user-secret with the correct key")]
+        public void Shall_parse_an_encrypted_lansen_message()
         {
             // Arrange
             var parser = new Parser();
