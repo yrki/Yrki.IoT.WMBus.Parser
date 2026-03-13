@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Tests/Tests.csproj" />
+  <Project Path="Yrki.IoT.WMBus.Parser/Yrki.IoT.WMBus.Parser.csproj" />
+</Solution>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Yrki.IoT.WMBus.Parser.Extensions
 {
@@ -6,7 +7,12 @@ namespace Yrki.IoT.WMBus.Parser.Extensions
     {
         public static byte[] ToByteArray(this string message)
         {
-            message = message.Replace(" ", string.Empty);
+            message = new string(message.Where(static c => !char.IsWhiteSpace(c)).ToArray());
+
+            if (message.Length % 2 != 0)
+            {
+                throw new FormatException("Hex message must contain an even number of digits.");
+            }
 
             var bytes = new byte[message.Length / 2];
             for (int i = 0; i < bytes.Length; i++)

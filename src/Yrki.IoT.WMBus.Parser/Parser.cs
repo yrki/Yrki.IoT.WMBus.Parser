@@ -107,7 +107,7 @@ namespace Yrki.IoT.WMBus.Parser
         {
             byte[] decryptedPayload;
             // Decrypt the payload
-            using (AesManaged aesAlg = new AesManaged())
+            using (Aes aesAlg = Aes.Create())
             {
                 aesAlg.Key = encryptionKey.ToByteArray();
                 aesAlg.IV = initializationVector;
